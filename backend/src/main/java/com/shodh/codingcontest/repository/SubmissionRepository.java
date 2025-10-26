@@ -30,5 +30,8 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
     
     @Query("SELECT s FROM Submission s WHERE s.contest.id = :contestId AND s.status = 'ACCEPTED' ORDER BY s.submissionTime ASC")
     List<Submission> findAcceptedSubmissionsByContestOrderByTime(@Param("contestId") Long contestId);
+    
+    @Query("SELECT s FROM Submission s JOIN FETCH s.problem p JOIN FETCH p.testCases WHERE s.id = :submissionId")
+    Optional<Submission> findByIdWithProblemAndTestCases(@Param("submissionId") Long submissionId);
 }
 

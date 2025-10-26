@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 public class CodeJudgeService {
     
     private static final String DOCKER_IMAGE = "java-judge:latest";
-    private static final String TEMP_DIR = System.getProperty("java.io.tmpdir") + "/judge";
+    private static final String TEMP_DIR = System.getProperty("java.io.tmpdir") + java.io.File.separator + "judge";
     
     public JudgeResult judgeSubmission(Submission submission) {
         List<TestCase> testCases = submission.getProblem().getTestCases();
@@ -82,10 +82,13 @@ public class CodeJudgeService {
     
     private JudgeResult runTests(Path submissionDir, Path codeFile, List<TestCase> testCases, Submission submission) {
         try {
-            // Compile the Java code
+            // Convert Windows path to Unix-style path for Docker
+            String dockerPath = convertToDockerPath(submissionDir.toString());
+            
+            // Compile the Java code using Docker
             Process compileProcess = new ProcessBuilder(
                 "docker", "run", "--rm",
-                "-v", submissionDir.toString() + ":/workspace",
+                "-v", dockerPath + ":/workspace",
                 "-w", "/workspace",
                 DOCKER_IMAGE,
                 "javac", "Solution.java"
@@ -152,9 +155,13 @@ public class CodeJudgeService {
         try {
             long startTime = System.currentTimeMillis();
             
+            // Convert Windows path to Unix-style path for Docker
+            String dockerPath = convertToDockerPath(submissionDir.toString());
+            
+            // Run the Java code using Docker
             Process runProcess = new ProcessBuilder(
                 "docker", "run", "--rm",
-                "-v", submissionDir.toString() + ":/workspace",
+                "-v", dockerPath + ":/workspace",
                 "-w", "/workspace",
                 "--memory", submission.getProblem().getMemoryLimitMB() + "m",
                 "--cpus", "1",
@@ -205,6 +212,24 @@ public class CodeJudgeService {
             }
         }
         return output.toString();
+    }
+    
+    private String convertToDockerPath(String windowsPath) {
+        // Convert Windows path to Unix-style path for Docker on Windows
+        // On Windows with Docker Desktop, we need to convert paths
+        // Example: C:\Users\kedia\Temp -> /c/Users/kedia/Temp
+        String path = windowsPath.replace("\\", "/");
+        
+        // Handle drive letters - convert C: to /c
+        for (char drive = 'A'; drive <= 'Z'; drive++) {
+            String upper = drive + ":";
+            String lower = "/" + Character.toLowerCase(drive);
+            if (path.startsWith(upper)) {
+                path = path.replace(upper, lower);
+            }
+        }
+        
+        return path;
     }
     
     private void cleanup(Path submissionDir) {

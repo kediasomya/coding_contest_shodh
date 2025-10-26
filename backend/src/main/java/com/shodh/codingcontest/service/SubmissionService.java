@@ -73,7 +73,7 @@ public class SubmissionService {
     @Async
     public void processSubmissionAsync(Long submissionId) {
         // Fetch submission with proper eager loading to avoid session issues
-        Submission submission = submissionRepository.findById(submissionId).orElse(null);
+        Submission submission = submissionRepository.findByIdWithProblemAndTestCases(submissionId).orElse(null);
         
         if (submission == null) {
             return;

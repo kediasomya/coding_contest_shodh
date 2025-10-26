@@ -55,15 +55,15 @@ export default function JoinContest() {
               id="contestId"
               value={contestId}
               onChange={(e) => setContestId(e.target.value)}
-              placeholder="Enter contest ID"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Enter contest ID (Available: 1)"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
               required
             />
           </div>
 
           <div>
             <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
-              Username
+              Username <span className="text-red-500">*</span> (required)
             </label>
             <input
               type="text"
@@ -71,7 +71,7 @@ export default function JoinContest() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Enter your username"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
               required
             />
           </div>
@@ -92,6 +92,9 @@ export default function JoinContest() {
         </form>
 
         <div className="mt-6 text-center">
+          <p className="text-sm text-blue-600 font-medium mb-2">
+            Available Contest: Contest ID 1 - Shodh AI Coding Challenge
+          </p>
           <p className="text-sm text-gray-500">
             Don't have a contest ID? Contact your contest organizer.
           </p>

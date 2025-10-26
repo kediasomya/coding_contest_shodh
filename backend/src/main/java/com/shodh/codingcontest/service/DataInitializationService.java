@@ -67,11 +67,11 @@ public class DataInitializationService implements CommandLineRunner {
         // Problem 2: Factorial
         Problem problem2 = new Problem(
             "Factorial",
-            "Write a program that calculates the factorial of a given number.",
+            "Write a program that calculates the factorial of a given number. Read input using Scanner and print ONLY the result (no extra text). Example: For input '5', output should be '120' and nothing else.",
             contest
         );
-        problem2.setInputFormat("A single positive integer n");
-        problem2.setOutputFormat("The factorial of n");
+        problem2.setInputFormat("A single positive integer n (read the number directly, no prompts)");
+        problem2.setOutputFormat("The factorial of n (print ONLY the number, no extra text)");
         problem2.setSampleInput("5");
         problem2.setSampleOutput("120");
         problem2.setConstraints("1 ≤ n ≤ 10");

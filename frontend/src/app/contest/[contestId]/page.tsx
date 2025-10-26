@@ -16,10 +16,13 @@ export default function ContestPage() {
   const [contest, setContest] = useState<Contest | null>(null);
   const [selectedProblem, setSelectedProblem] = useState<Problem | null>(null);
   const [problemCode, setProblemCode] = useState<Map<number, string>>(new Map());
-  const [currentSubmissionId, setCurrentSubmissionId] = useState<number | null>(null);
+  const [problemSubmissionId, setProblemSubmissionId] = useState<Map<number, number>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const defaultCode = '// Write your solution here\npublic class Solution {\n    public static void main(String[] args) {\n        \n    }\n}';
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const [language, setLanguage] = useState<string>('java');
+  
+  const defaultCode = 'import java.util.Scanner;\n\npublic class Solution {\n    public static void main(String[] args) {\n        // TODO: Write your code here\n        \n    }\n}';
   
   // Get code for current problem
   const code = selectedProblem ? (problemCode.get(selectedProblem.id) || defaultCode) : defaultCode;
@@ -54,13 +57,13 @@ export default function ContestPage() {
 
   const handleSubmit = async () => {
     if (!selectedProblem || !code.trim()) {
-      setError('Please select a problem and write some code');
+      setSubmissionError('Please select a problem and write some code');
       return;
     }
 
     const username = localStorage.getItem('username');
     if (!username) {
-      setError('Username not found. Please join the contest again.');
+      setSubmissionError('Username not found. Please join the contest again.');
       return;
     }
 
@@ -69,15 +72,15 @@ export default function ContestPage() {
       problemId: selectedProblem.id,
       username,
       code,
-      language: 'java'
+      language
     };
 
     try {
-      setError(null);
+      setSubmissionError(null);
       const response = await apiService.submitCode(submission);
-      setCurrentSubmissionId(response.submissionId);
+      setProblemSubmissionId(prev => new Map(prev).set(selectedProblem.id, response.submissionId));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to submit code');
+      setSubmissionError(err instanceof Error ? err.message : 'Failed to submit code');
     }
   };
 
@@ -177,14 +180,38 @@ export default function ContestPage() {
                     <h3 className="text-lg font-semibold text-gray-900">Code Editor</h3>
                   </div>
                   <div className="p-4">
+                    {/* Language Selection */}
+                    <div className="mb-4">
+                      <label htmlFor="language" className="block text-sm font-medium text-gray-700 mb-2">
+                        Programming Language:
+                      </label>
+                      <select
+                        id="language"
+                        value={language}
+                        onChange={(e) => setLanguage(e.target.value)}
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                      >
+                        <option value="java">Java</option>
+                        <option value="cpp" disabled>C++ (Coming Soon)</option>
+                        <option value="python" disabled>Python (Coming Soon)</option>
+                      </select>
+                    </div>
+
+                    {/* Error Display */}
+                    {submissionError && (
+                      <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="text-sm text-red-600">{submissionError}</p>
+                      </div>
+                    )}
+
                     <CodeEditor
                       value={code}
                       onChange={handleCodeChange}
-                      language="java"
+                      language={language}
                     />
                     <div className="mt-4 flex justify-between items-center">
                       <div className="text-sm text-gray-500">
-                        Language: Java
+                        Language: {language.charAt(0).toUpperCase() + language.slice(1)}
                       </div>
                       <button
                         onClick={handleSubmit}
@@ -197,9 +224,9 @@ export default function ContestPage() {
                 </div>
 
                 {/* Submission Status */}
-                {currentSubmissionId && (
+                {selectedProblem && problemSubmissionId.get(selectedProblem.id) && (
                   <div className="mt-6">
-                    <SubmissionStatus submissionId={currentSubmissionId} />
+                    <SubmissionStatus submissionId={problemSubmissionId.get(selectedProblem.id)!} />
                   </div>
                 )}
               </>
